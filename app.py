@@ -8,11 +8,15 @@ from sklearn.preprocessing import StandardScaler
 
 st.set_page_config(layout="wide")
 
-df = pd.read_csv("agrishield_deploy.csv")
+df = pd.read_csv("agrishield_ai_output.csv")
 district_df = pd.read_csv("district_intelligence.csv")
 commodity_df = pd.read_csv("commodity_intelligence.csv")
 
 df["Date"] = pd.to_datetime(df["Date"])
+df["ML_Anomaly_Label"] = pd.to_numeric(
+    df["ML_Anomaly_Label"],
+    errors="coerce"
+)
 
 page = st.sidebar.radio(
     "Navigation",
@@ -101,15 +105,42 @@ if page == "District Intelligence":
     )
 
     district_data = district_df[district_df["District"] == selected_district].iloc[0]
-    district_market_df = df[df["District"] == selected_district]
+    district_market_df = df[
+        df["District"].str.strip().str.lower()
+        ==
+        selected_district.strip().lower()
+    ]
 
     col1, col2, col3 = st.columns(3)
     col1.metric("Risk Tier", district_data["Risk_Tier"])
     col2.metric("National Rank", int(district_data["National_Rank"]))
     col3.metric("Risk Momentum", district_data["Risk_Momentum"])
 
-    anomaly_rate = (district_market_df["ML_Anomaly_Label"] == -1).mean() * 100
-    st.metric("ML Anomaly Rate", f"{anomaly_rate:.2f}%")
+    anomaly_count = (
+        district_market_df["ML_Anomaly_Label"] == -1
+    ).sum()
+
+    anomaly_rate = (
+        anomaly_count / len(district_market_df)
+    ) * 100 if len(district_market_df) > 0 else 0
+
+    avg_risk_score = district_market_df[
+        "Composite_Risk_Score"
+    ].mean()
+
+    col4, col5 = st.columns(2)
+
+    col4.metric(
+        "Detected Outlier Rate",
+        f"{anomaly_rate:.2f}%"
+    )
+
+    col5.metric(
+        "Avg Risk Score",
+        round(avg_risk_score, 2)
+    )
+
+    st.caption(f"Detected anomalies: {anomaly_count}")
 
     trend = (
         district_market_df.groupby("Date")["Composite_Risk_Score"]
@@ -220,9 +251,9 @@ if page == "Commodity Intelligence":
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Average Risk Score", round(avg_risk, 2))
-    col2.metric("Price Volatility", round(volatility, 4))
-    col3.metric("Anomaly Rate", f"{anomaly_rate:.2f}%")
-    col4.metric("High Risk Frequency", f"{high_risk_rate*100:.2f}%")
+    col2.metric("Price Volatility", round(volatility, 2))
+    col3.metric("Anomaly Rate", f"{anomaly_rate:.4f}%")
+    col4.metric("High Risk Frequency", f"{high_risk_rate*100:.4f}%")
 
     st.subheader("Anomaly Breakdown")
 
