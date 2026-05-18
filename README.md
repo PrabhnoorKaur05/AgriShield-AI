@@ -46,6 +46,11 @@ Python, Pandas, NumPy, Scikit-learn, Streamlit
 - Strategic Risk Lab
 - Investigation Panel
 
+## Live Demo
+
+https://huggingface.co/spaces/pk0781/agrishield-ai
+
+
 ## Screenshots
 
 ### Overview Dashboard
