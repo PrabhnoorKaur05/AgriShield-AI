@@ -52,10 +52,10 @@ Python, Pandas, NumPy, Scikit-learn, Streamlit
 ![Overview](screenshots/overview.png)
 
 ### District Intelligence
-![District](screenshots/district intelligence.png)
+![District](screenshots/district_intelligence.png)
 
 ### Commodity Intelligence
-![Commodity](screenshots/commodity intelligence.png)
+![Commodity](screenshots/commodity_intelligence.png)
 
 
 ## Installation
